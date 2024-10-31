@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-from serial import Serial
+import serial
 import time
 
 # Khởi tạo MediaPipe Hands
@@ -12,9 +12,13 @@ mp_drawing = mp.solutions.drawing_utils
 cap = cv2.VideoCapture(0)
 
 # Khởi tạo cổng COM (cấu hình tùy thuộc vào thông số cổng của bạn)
-ser = Serial(
+ser = serial.Serial(
             port="/dev/ttyUSB0",
             baudrate=115200,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            bytesize=serial.EIGHTBITS,
+            timeout=1
         )
 time.sleep(2)  # Chờ cổng COM khởi động
 
