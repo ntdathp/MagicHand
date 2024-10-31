@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-import serial
+from serial import Serial
 import time
 
 # Khởi tạo MediaPipe Hands
@@ -12,7 +12,10 @@ mp_drawing = mp.solutions.drawing_utils
 cap = cv2.VideoCapture(0)
 
 # Khởi tạo cổng COM (cấu hình tùy thuộc vào thông số cổng của bạn)
-ser = serial.Serial('COM3', 9600)  # Thay 'COM3' bằng cổng COM bạn đang sử dụng
+ser = Serial(
+            port="/dev/ttyUSB0",
+            baudrate=115200,
+        )
 time.sleep(2)  # Chờ cổng COM khởi động
 
 def check_finger_status(landmarks):
@@ -23,16 +26,16 @@ def check_finger_status(landmarks):
 
     # Kiểm tra ngón cái với trạng thái đảo ngược (Up thành Down và ngược lại)
     if landmarks[tips_ids[0]].x < landmarks[tips_ids[0] - 1].x:
-        finger_status.append("Down")  # Đảo ngược: nếu bình thường là "Up" thì đổi thành "Down"
+        finger_status.append("0")  # "Down" là 0
     else:
-        finger_status.append("Up")    # Đảo ngược: nếu bình thường là "Down" thì đổi thành "Up"
+        finger_status.append("1")  # "Up" là 1
 
     # Kiểm tra các ngón còn lại (so sánh với khớp giữa của từng ngón)
     for tip_id in tips_ids[1:]:
         if landmarks[tip_id].y < landmarks[tip_id - 2].y:
-            finger_status.append("Up")
+            finger_status.append("1")  # "Up" là 1
         else:
-            finger_status.append("Down")
+            finger_status.append("0")  # "Down" là 0
 
     return finger_status
 
@@ -65,15 +68,17 @@ while cap.isOpened():
             fingers = ["Thumb", "Index Finger", "Middle Finger", "Ring Finger", "Pinky"]
 
             for finger, status in zip(fingers, finger_status):
-                cv2.putText(image, f"{finger}: {status}", (10, 40 + fingers.index(finger) * 30), 
+                display_text = "Up" if status == "1" else "Down"
+                cv2.putText(image, f"{finger}: {display_text}", (10, 40 + fingers.index(finger) * 30), 
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
             # Gửi dữ liệu qua cổng COM mỗi 1 giây
             current_time = time.time()
             if current_time - last_sent_time >= 1:  # Kiểm tra nếu đã qua 1 giây
                 # Tạo chuỗi trạng thái các ngón tay
-                finger_status_str = ', '.join(f"{finger}: {status}" for finger, status in zip(fingers, finger_status))
+                finger_status_str = ','.join(finger_status)  # Chuyển đổi thành dãy số dạng "1,1,0,0,1"
                 ser.write(finger_status_str.encode())  # Gửi chuỗi qua cổng COM
+                print(finger_status_str)
                 last_sent_time = current_time  # Cập nhật thời gian gửi
 
     # Hiển thị hình ảnh kết quả
