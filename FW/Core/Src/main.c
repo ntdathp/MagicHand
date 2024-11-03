@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "pca9685.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -227,11 +228,11 @@ void process_received_data()
                 // Trường hợp toàn là '0'
                 // Thực hiện hành động cho trường hợp toàn 0
                 // Ví dụ:
-            	finger0_up;
-            	finger1_up;
-            	finger2_up;
-            	finger3_up;
-            	finger4_up;
+            	finger0_up();
+            	finger1_up();
+            	finger2_up();
+            	finger3_up();
+            	finger4_up();
             }
             else if (all_ones)
             {
@@ -239,8 +240,8 @@ void process_received_data()
                 // Thực hiện hành động cho trường hợp toàn 1
                 // Ví dụ:
             	finger0_down();
-            	finger1_up;
-            	finger2_up;
+            	finger1_up();
+            	finger2_up();
             	finger3_down();
             	finger4_down();
 
@@ -258,7 +259,7 @@ void process_received_data()
             else
             {
                 // Trường hợp khác không hợp lệ, bỏ qua
-                printf("Buffer does not match any condition.\n");
+
                 return;
             }
         }
@@ -338,14 +339,14 @@ int main(void)
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-//  PCA9685_Init(&hi2c1);
-//  PCA9685_SetServoAngle(0, 180); //120 -180
-//  PCA9685_SetServoAngle(1, 180); //180 -50
-//  PCA9685_SetServoAngle(2, 180);   //180-0
-//  PCA9685_SetServoAngle(3, 180);   //180-40
-//  PCA9685_SetServoAngle(4, 180);   //180-30
+  PCA9685_Init(&hi2c1);
+  PCA9685_SetServoAngle(0, 180); //120 -180
+  PCA9685_SetServoAngle(1, 180); //180 -50
+  PCA9685_SetServoAngle(2, 180);   //180-0
+  PCA9685_SetServoAngle(3, 180);   //180-40
+  PCA9685_SetServoAngle(4, 180);   //180-30
 
-//  HAL_Delay(2000);
+  HAL_Delay(2000);
 
   HAL_UART_Receive_IT(&huart1, &received_byte, 1);
   led_chasing();
@@ -358,7 +359,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  process_received_data();
+	  process_received_data();
 	  check_button_press();
 
 
